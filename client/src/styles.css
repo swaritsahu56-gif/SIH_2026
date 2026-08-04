@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+* { box-sizing: border-box; }
+body { margin: 0; color: #173b28; background: #f7faf7; font-family: 'DM Sans', sans-serif; }
+button, input { font: inherit; }
+.brand-serif { font-family: 'Playfair Display', serif; }
+.field-map { background: linear-gradient(145deg, rgba(220,243,224,.85), rgba(176,220,184,.6)), repeating-linear-gradient(25deg, transparent 0 52px, rgba(39,125,66,.14) 53px 55px), repeating-linear-gradient(-65deg, transparent 0 95px, rgba(39,125,66,.12) 96px 98px); }
+.sun { background: radial-gradient(circle at 36% 32%, #fff9c4 0 8%, #f7bd3f 9% 48%, #ed962d 49% 100%); }
