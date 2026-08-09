@@ -3,3 +3,6 @@ dist
 .env
 server/.env
 *.log
+# Ignore local virtualenv and editor settings
+crop-ai-model/
+.vscode/

@@ -5,8 +5,8 @@ import { Activity, Bell, Bot, ChevronDown, CloudSun, Droplets, LayoutDashboard, 
 
 const nav = [[LayoutDashboard, 'Overview'], [Map, 'My Fields'], [ScanLine, 'Crop Doctor'], [Droplets, 'Irrigation'], [Bot, 'AI Assistant'], [LineChart, 'Market prices'],[TrendingUp, 'Profit Calculator'], [Settings, 'Settings']];
 const trend = [{ day:'Mon', value:38 }, { day:'Tue', value:44 }, { day:'Wed', value:41 }, { day:'Thu', value:55 }, { day:'Fri', value:48 }, { day:'Sat', value:67 }, { day:'Sun', value:64 }];
-const Card = ({ children, className = '' }) => 
-<section className={`rounded-2xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white p-5 shadow-card ${className}`}>
+const Card = ({ children, className = '', style }) => 
+<section className={`rounded-2xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white p-5 shadow-card ${className}`} style={style}>
 {children}
 </section>;
 export default function Dashboard() {
@@ -27,6 +27,22 @@ useEffect(() => {
   useEffect(() => { fetch('http://localhost:5000/api/dashboard').then((r) => r.json()).then(setApi).catch(() => {}); }, []);
   useEffect(() => { const en = { 'Overview':'डैशबोर्ड', 'My Fields':'मेरे खेत', 'Crop Doctor':'फसल डॉक्टर', 'Irrigation':'सिंचाई', 'AI Assistant':'एआई सहायक', 'Settings':'सेटिंग्स', 'Good morning,':'सुप्रभात,', 'Your farm is looking healthy':'आपका खेत स्वस्थ है', 'Current weather':'मौजूदा मौसम', 'Soil moisture':'मिट्टी की नमी', 'Crop health':'फसल स्वास्थ्य', 'Yield forecast':'उपज पूर्वानुमान', 'Field sensor monitor':'फील्ड सेंसर मॉनिटर', 'Air humidity':'हवा की नमी', 'Sensor connected':'सेंसर जुड़ा है', 'Sensor paused':'सेंसर रुका है', 'GPS field location':'जीपीएस खेत स्थान', 'Use current GPS':'वर्तमान जीपीएस लें', 'Language / भाषा':'भाषा', 'Notifications':'सूचनाएं', 'Mark all read':'सभी को पढ़ा हुआ करें', 'Weather today':'आज का मौसम', 'Crop doctor':'फसल डॉक्टर', 'Upload a crop photo':'फसल की फोटो अपलोड करें', 'Scan crop now':'फसल स्कैन करें', 'Ask Krishi AI':'कृषि एआई से पूछें', 'Start conversation':'बातचीत शुरू करें', 'Back to overview':'डैशबोर्ड पर वापस', 'Add a field':'खेत जोड़ें', 'Save field':'खेत सहेजें', 'Irrigation recommendation':'सिंचाई सलाह', 'Market prices':'बाज़ार भाव', 'Farm assistant':'कृषि सहायक', 'Ask':'पूछें', 'Save preferences':'सेटिंग्स सहेजें' }; const hi = Object.fromEntries(Object.entries(en).map(([a,b])=>[b,a])); const convert = (node) => { if (node.nodeType !== 3) return; const value = node.nodeValue.trim(); const next = language === 'Hindi' ? en[value] : hi[value]; if (next) node.nodeValue = node.nodeValue.replace(value, next); }; const apply = () => { const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let node; while (node = walker.nextNode()) convert(node); }; apply(); const observer = new MutationObserver(() => apply()); observer.observe(document.body, { childList:true, subtree:true }); return () => observer.disconnect(); }, [language]);
   const choose = (label) => { setActive(label); setOpen(false); };
+
+  const [fieldMapImage, setFieldMapImage] = useState(null);
+  useEffect(() => {
+    const load = (lat, lng) => setFieldMapImage(`http://localhost:5000/api/satellite-view?lat=${lat}&lng=${lng}`);
+    const fallback = () => load(18.5204, 73.8567); // Pune fallback
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => load(pos.coords.latitude, pos.coords.longitude),
+        fallback,
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    } else {
+      fallback();
+    }
+  }, []);
+
   return <div className="min-h-screen bg-[#f6f8f5] dark:bg-slate-900 lg:flex"><aside className={`fixed inset-y-0 left-0 z-30 flex w-72 flex-col bg-leaf-900 px-5 py-6 text-white transition-transform lg:static lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}><div className="flex items-center gap-3 px-3 text-xl font-bold"><span className="grid h-10 w-10 place-items-center rounded-xl bg-leaf-500"><Leaf/></span> AgriCopilot</div><div className="mt-11 space-y-1">{nav.map(([Icon, label]) => <button onClick={() => choose(label)} key={label} className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium ${active === label ? 'bg-white/15 text-white' : 'text-leaf-100 hover:bg-white/10'}`}><Icon size={19}/>{label}</button>)}</div><div className="mt-auto rounded-xl bg-white/10 p-4"><p className="text-sm font-bold">Need field support?</p><p className="mt-1 text-xs leading-5 text-leaf-100">Ask Krishi, your AI farm assistant.</p><button onClick={() => choose('AI Assistant')} className="mt-3 text-xs font-bold text-lime-300">Start a conversation →</button></div></aside>{open && <button onClick={() => setOpen(false)} className="fixed inset-0 z-20 bg-slate-900/30 lg:hidden"/>}
     <main className="min-w-0 flex-1"><header className="relative flex h-20 items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-5 sm:px-8"><div className="flex items-center gap-4"><button onClick={() => setOpen(true)} className="lg:hidden"><Menu/></button><div><p className="text-sm text-slate-500">Tuesday, 04 August 2026</p><h1 className="text-xl font-bold text-slate-800">Good morning, {user.name.split(' ')[0]} <span>🌱</span></h1></div></div><div className="flex items-center gap-4"><button onClick={() => setShowNotifications(!showNotifications)} className="relative rounded-full bg-slate-100 p-2.5"><Bell size={18}/>{notifications.length > 0 && <i className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500"/>}</button><button onClick={() => setShowProfile(true)} className="flex items-center gap-2"><span className="grid h-10 w-10 place-items-center rounded-full bg-leaf-100 font-bold text-leaf-700">{user.name[0]}</span><ChevronDown size={16}/></button></div>{showNotifications && <div className="absolute right-5 top-[72px] z-20 w-[min(92vw,370px)] rounded-2xl border border-slate-100 bg-white p-4 shadow-2xl"><div className="flex items-center justify-between"><b className="text-slate-800">Notifications</b><button onClick={() => setNotifications([])} className="text-xs font-bold text-leaf-600">Mark all read</button></div>{notifications.length ? <div className="mt-3 divide-y">{notifications.map((n, i) => <div key={i} className="py-3"><div className="flex gap-3"><span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-leaf-500"/><div><p className="text-sm font-bold text-slate-700">{n.title}</p><p className="mt-1 text-xs leading-5 text-slate-500">{n.text}</p><p className="mt-1 text-xs text-slate-400">{n.time}</p></div></div></div>)}</div> : <p className="py-8 text-center text-sm text-slate-500">You’re all caught up.</p>}</div>}</header>{showProfile && <ProfileModal user={user} onSave={(next) => { setUser(next); localStorage.setItem('agri_profile', JSON.stringify(next)); setShowProfile(false); }} onClose={() => setShowProfile(false)}/>} 
       <div className="mx-auto max-w-[1600px] p-5 sm:p-8">{active !== 'Overview' ? <FeatureView
@@ -39,9 +55,13 @@ useEffect(() => {
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4"><Metric icon={<CloudSun/>} label="Current weather" value="28°" detail="Partly cloudy · Pune" tint="bg-sky-50 text-sky-600"/><Metric icon={<Droplets/>} label="Soil moisture" value="68%" detail="Optimal range" tint="bg-cyan-50 text-cyan-600"/><Metric icon={<Sprout/>} label="Crop health" value="Good" detail="92% health score" tint="bg-leaf-50 text-leaf-600"/><Metric icon={<TrendingUp/>} label="Yield forecast" value="+12%" detail="vs. last season" tint="bg-amber-50 text-amber-600"/></div>
         <SensorMonitor/>
         <HyperlocalWeather/>
+        <SatelliteView/>
         <GpsPanel/>
         <LanguagePanel onChange={setLanguage}/>
-        <div className="mt-5 grid gap-5 xl:grid-cols-[1.4fr_.9fr]"><Card className="field-map min-h-[330px] overflow-hidden relative"><div className="absolute inset-0 bg-gradient-to-t from-leaf-900/40 to-transparent"/><div className="relative flex justify-between"><div><p className="text-sm font-bold text-leaf-900">North field</p><p className="text-xs text-leaf-700">Wheat · 12.4 acres</p></div><span className="rounded-lg bg-white/80 px-3 py-2 text-xs font-bold text-leaf-700"><Map className="mr-1 inline" size={15}/> Field map</span></div><div className="absolute bottom-5 left-5 rounded-xl bg-white p-4 shadow-lg"><p className="text-xs text-slate-500">FIELD HEALTH</p><p className="mt-1 text-2xl font-bold text-leaf-700">92 <span className="text-sm">/ 100</span></p><div className="mt-2 h-1.5 w-32 overflow-hidden rounded bg-slate-100"><div className="h-full w-[92%] rounded bg-leaf-500"/></div></div><span className="absolute right-[35%] top-[45%] grid h-11 w-11 place-items-center rounded-full border-4 border-white bg-leaf-600 text-white shadow-lg"><Sprout size={20}/></span></Card>
+        <div className="mt-5 grid gap-5 xl:grid-cols-[1.4fr_.9fr]"><Card
+  className="field-map min-h-[330px] overflow-hidden relative"
+  style={fieldMapImage ? { backgroundImage: `url(${fieldMapImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+><div className="absolute inset-0 bg-gradient-to-t from-leaf-900/40 to-transparent"/><div className="relative flex justify-between"><div><p className="text-sm font-bold text-leaf-900">North field</p><p className="text-xs text-leaf-700">Wheat · 12.4 acres</p></div><span className="rounded-lg bg-white/80 px-3 py-2 text-xs font-bold text-leaf-700"><Map className="mr-1 inline" size={15}/> Field map</span></div><div className="absolute bottom-5 left-5 rounded-xl bg-white p-4 shadow-lg"><p className="text-xs text-slate-500">FIELD HEALTH</p><p className="mt-1 text-2xl font-bold text-leaf-700">92 <span className="text-sm">/ 100</span></p><div className="mt-2 h-1.5 w-32 overflow-hidden rounded bg-slate-100"><div className="h-full w-[92%] rounded bg-leaf-500"/></div></div><span className="absolute right-[35%] top-[45%] grid h-11 w-11 place-items-center rounded-full border-4 border-white bg-leaf-600 text-white shadow-lg"><Sprout size={20}/></span></Card>
           <Card><div className="flex items-start justify-between"><div><p className="text-sm font-bold text-slate-800">Weather today</p><p className="mt-1 text-xs text-slate-500">Pune, Maharashtra</p></div><button className="text-leaf-600"><ChevronDown size={18}/></button></div><div className="mt-4 flex items-center gap-5"><div className="sun grid h-16 w-16 place-items-center rounded-full"><Sun className="text-white"/></div><div><span className="text-4xl font-bold text-slate-800">28°</span><p className="text-sm text-slate-500">Feels like 30°</p></div></div><div className="mt-5 grid grid-cols-3 border-t border-slate-100 pt-4 text-center text-xs"><div><Droplets className="mx-auto mb-1 text-sky-500" size={17}/><b>68%</b><p className="text-slate-400">Humidity</p></div><div><CloudSun className="mx-auto mb-1 text-slate-500" size={17}/><b>10%</b><p className="text-slate-400">Rain</p></div><div><TrendingUp className="mx-auto mb-1 text-leaf-600" size={17}/><b>12 km/h</b><p className="text-slate-400">Wind</p></div></div></Card></div>
         <div className="mt-5 grid gap-5 xl:grid-cols-[1.1fr_.9fr_.9fr]"><Card><div className="flex justify-between"><div><p className="font-bold text-slate-800">Soil moisture trend</p><p className="mt-1 text-xs text-slate-500">Last 7 days · North field</p></div><span className="text-sm font-bold text-leaf-600">68%</span></div><div className="mt-3 h-40"><ResponsiveContainer><AreaChart data={trend}><defs><linearGradient id="moisture" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#2c9a59" stopOpacity=".28"/><stop offset="100%" stopColor="#2c9a59" stopOpacity="0"/></linearGradient></defs><XAxis dataKey="day" tickLine={false} axisLine={false} tick={{fontSize:11, fill:'#94a3b8'}}/><Tooltip/><Area dataKey="value" stroke="#24854b" strokeWidth={3} fill="url(#moisture)"/></AreaChart></ResponsiveContainer></div></Card><CropDoctor/><Assistant/></div></>}
       </div></main></div>;
@@ -52,6 +72,76 @@ function SensorMonitor() { const [humidity, setHumidity] = useState(68); const [
 function SensorReading({ label, value, icon, color, status }) { return <div className={`rounded-xl p-4 ${color}`}><div className="flex items-center justify-between"><span className="font-bold">{label}</span>{icon}</div><div className="mt-4 flex items-end justify-between"><b className="text-3xl">{value}%</b><span className="text-xs font-medium">{status}</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-white/80"><div className="h-full rounded-full bg-current" style={{width:`${value}%`}}/></div></div>; }
 function HyperlocalWeather() { const [weather, setWeather] = useState(null); const [status, setStatus] = useState('Use GPS to load live farm weather.'); const load = () => { if (!navigator.geolocation) return setStatus('GPS is not supported by this browser.'); setStatus('Getting your GPS weather…'); navigator.geolocation.getCurrentPosition(async (position) => { try { const response = await fetch(`http://localhost:5000/api/hyperlocal-weather?lat=${position.coords.latitude}&lng=${position.coords.longitude}`); const data = await response.json(); if (!response.ok) throw new Error(data.message); setWeather(data); setStatus('Live weather for your current location'); } catch (error) { setStatus(error.message || 'Live weather could not be loaded.'); } }, () => setStatus('Allow location access to load hyperlocal weather.'), { enableHighAccuracy: true, timeout: 10000 }); }; return <Card className="mt-5"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-bold text-slate-800">Hyperlocal weather intelligence</p><p className="mt-1 text-xs text-slate-500">{status}</p></div><button onClick={load} className="rounded-lg bg-leaf-600 px-4 py-2.5 text-sm font-bold text-white"><CloudSun className="mr-1 inline" size={16}/> Update weather</button></div>{weather && <><div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5"><WeatherStat label="Temperature" value={`${weather.temperature}°C`}/><WeatherStat label="Rain next 4h" value={`${weather.rainProbability4h}%`}/><WeatherStat label="UV index" value={weather.uvIndex}/><WeatherStat label="Wind speed" value={`${weather.wind} km/h`}/><WeatherStat label="Humidity" value={`${weather.humidity}%`}/></div><div className="mt-4 rounded-xl bg-leaf-50 p-4 text-sm text-leaf-900"><b>AI farm advice</b><p className="mt-1">{weather.advice}</p></div>{weather.alerts.length > 0 && <div className="mt-3 space-y-2">{weather.alerts.map((alert) => <div key={alert.type} className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900"><b>{alert.type}:</b> {alert.message}</div>)}</div>}</>}</Card>; }
 function WeatherStat({ label, value }) { return <div className="rounded-xl bg-sky-50 p-3 text-center"><p className="text-xs text-slate-500">{label}</p><p className="mt-1 font-bold text-slate-800">{value}</p></div>; }
+function SatelliteView() {
+  const [coords, setCoords] = useState(null);
+  const [mode, setMode] = useState('true-color');
+  const [status, setStatus] = useState('Use GPS to load a satellite view of your field.');
+
+  const load = () => {
+    if (!navigator.geolocation) return setStatus('GPS is not supported by this browser.');
+    setStatus('Fetching satellite imagery…');
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCoords({ lat: position.coords.latitude, lng: position.coords.longitude });
+        setStatus('Real satellite photo of your field location.');
+      },
+      () => setStatus('Allow location access to load satellite imagery.'),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const selectMode = (next) => {
+    setMode(next);
+    if (coords) {
+      setStatus(next === 'ndvi'
+        ? 'NDVI vegetation view — green is healthy, grey is cloud/stressed or bare soil.'
+        : 'Real satellite photo of your field location.');
+    }
+  };
+
+  const imageUrl = coords
+    ? `http://localhost:5000/api/satellite-view?lat=${coords.lat}&lng=${coords.lng}&mode=${mode}`
+    : null;
+
+  return (
+    <Card className="mt-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="font-bold text-slate-800">Satellite field view</p>
+          <p className="mt-1 text-xs text-slate-500">{status}</p>
+        </div>
+        <button onClick={load} className="rounded-lg bg-leaf-600 px-4 py-2.5 text-sm font-bold text-white">
+          <Map className="mr-1 inline" size={16} /> Load satellite view
+        </button>
+      </div>
+      {coords && (
+        <div className="mt-3 flex gap-2">
+          <button
+            onClick={() => selectMode('true-color')}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold ${mode === 'true-color' ? 'bg-leaf-600 text-white' : 'bg-leaf-50 text-leaf-700'}`}
+          >
+            Real photo
+          </button>
+          <button
+            onClick={() => selectMode('ndvi')}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold ${mode === 'ndvi' ? 'bg-leaf-600 text-white' : 'bg-leaf-50 text-leaf-700'}`}
+          >
+            Vegetation health (NDVI)
+          </button>
+        </div>
+      )}
+      {imageUrl && (
+       <img
+  key={imageUrl}
+  src={imageUrl}
+  alt="Satellite view of field"
+  className="mt-4 w-[350px] h-[250px] object-cover rounded-xl border border-slate-200"
+  onError={() => setStatus('Could not load satellite imagery for this location right now.')}
+/>
+      )}
+    </Card>
+  );
+}
 function GpsPanel() { const [location, setLocation] = useState(null); const locate = () => { if (!navigator.geolocation) return setLocation({ error: 'GPS is not supported by this browser.' }); navigator.geolocation.getCurrentPosition(async (p) => { const base = { lat: p.coords.latitude.toFixed(5), lng: p.coords.longitude.toFixed(5), accuracy: Math.round(p.coords.accuracy), address: 'Finding address…' }; setLocation(base); try { const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${p.coords.latitude}&lon=${p.coords.longitude}`); const place = await response.json(); const next = { ...base, address: place.display_name || 'Address unavailable for this GPS point.' }; setLocation(next); localStorage.setItem('agri_location', next.address); } catch { setLocation({ ...base, address: 'Address lookup unavailable; coordinates were saved.' }); } }, () => setLocation({ error: 'Location permission was not granted. Enable it in your browser and try again.' }), { enableHighAccuracy: true, timeout: 10000 }); }; return <Card className="mt-5"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-bold text-slate-800">GPS field location</p><p className="mt-1 text-xs text-slate-500">Set the current farm position for location-based advice.</p></div><button onClick={locate} className="rounded-lg bg-leaf-600 px-4 py-2.5 text-sm font-bold text-white"><Map className="mr-1 inline" size={16}/> Use current GPS</button></div>{location && <div className={`mt-4 rounded-xl p-4 text-sm ${location.error ? 'bg-amber-50 text-amber-900' : 'bg-leaf-50 text-leaf-900'}`}>{location.error || <><b>Field location saved</b><p className="mt-1">{location.address}</p><p className="mt-1 text-xs">Latitude {location.lat}, Longitude {location.lng} · accuracy around {location.accuracy} m</p></>}</div>}</Card>; }
 function LanguagePanel({ onChange }) { const [language, setLanguage] = useState(() => localStorage.getItem('agri_language') === 'Hindi' ? 'Hindi' : 'English'); const copy = { English: 'Your farm is looking healthy', Hindi: 'आपका खेत स्वस्थ है' }; const select = (next) => { setLanguage(next); localStorage.setItem('agri_language', next); onChange(next); }; return <Card className="mt-5"><p className="font-bold text-slate-800">Language / भाषा</p><p className="mt-1 text-xs text-slate-500">Choose English or Hindi for farmer guidance and future alerts.</p><div className="mt-4 flex flex-wrap gap-2">{['English','Hindi'].map(item => <button key={item} onClick={() => select(item)} className={`rounded-lg px-4 py-2 text-sm font-bold ${language === item ? 'bg-leaf-600 text-white' : 'bg-leaf-50 text-leaf-700'}`}>{item}</button>)}</div><p className="mt-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">Preview: {copy[language]}</p></Card>; }
 
