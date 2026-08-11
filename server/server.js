@@ -16,6 +16,10 @@ const upload = multer({
   dest: "uploads/"
 });
 
+// Diagnostic: print short prefix of GEMINI_API_KEY so you can verify Render/local env
+// Remove this log once you've confirmed the correct key is loaded
+console.log("Active GEMINI_API_KEY starts with:", process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.substring(0,5) : "KEY IS MISSING");
+
 const dbURI = process.env.MONGO_URI;
 if (dbURI) {
   mongoose.connect(dbURI)
