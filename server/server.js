@@ -4,6 +4,7 @@ import cors from 'cors';
 import axios from "axios";
 import multer from "multer";
 import fs from "fs";
+import mongoose from 'mongoose';
 
 
 
@@ -14,6 +15,16 @@ app.use(express.json());
 const upload = multer({
   dest: "uploads/"
 });
+
+const dbURI = process.env.MONGO_URI;
+if (dbURI) {
+  mongoose.connect(dbURI)
+    .then(() => console.log("Successfully connected to KisanMitra MongoDB database"))
+    .catch((err) => console.error("Database connection error:", err));
+} else {
+  console.warn('MONGO_URI is not configured. Skipping MongoDB connection.');
+}
+
 
 
 
