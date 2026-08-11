@@ -461,21 +461,21 @@ app.post("/api/chat", async (req, res) => {
       {
         model: "llama3.1",
         prompt: `
-You are Krishi AI, an agriculture assistant.
+      You are KisanMitra AI, an agriculture assistant.
 
-Reply in ${language}. Use simple farmer-friendly wording. If a diagnosis or treatment is uncertain, say so and advise contacting a local agriculture expert before using pesticides.
+      Reply in ${language}. Use simple farmer-friendly wording. If a diagnosis or treatment is uncertain, say so and advise contacting a local agriculture expert before using pesticides.
 
-Help farmers with:
-- Crop diseases
-- Fertilizers
-- Irrigation
-- Weather
-- Pest control
-- Sustainable farming
+      Help farmers with:
+      - Crop diseases
+      - Fertilizers
+      - Irrigation
+      - Weather
+      - Pest control
+      - Sustainable farming
 
-Farmer question:
-${message}
-`,
+      Farmer question:
+      ${message}
+      `,
         stream: false
       }
     );

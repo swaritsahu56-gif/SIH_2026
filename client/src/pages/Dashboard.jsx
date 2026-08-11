@@ -66,7 +66,7 @@ useEffect(() => {
     }
   }, [location]);
 
-  return <div className="min-h-screen bg-[#f6f8f5] dark:bg-slate-900 lg:flex"><aside className={`fixed inset-y-0 left-0 z-30 flex w-72 flex-col bg-leaf-900 px-5 py-6 text-white transition-transform lg:static lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}><div className="flex items-center gap-3 px-3 text-xl font-bold"><span className="grid h-10 w-10 place-items-center rounded-xl bg-leaf-500"><Leaf/></span> AgriCopilot</div><div className="mt-11 space-y-1">{nav.map(([Icon, label]) => <button onClick={() => choose(label)} key={label} className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium ${active === label ? 'bg-white/15 text-white' : 'text-leaf-100 hover:bg-white/10'}`}><Icon size={19}/>{label}</button>)}</div><div className="mt-auto rounded-xl bg-white/10 p-4"><p className="text-sm font-bold">Need field support?</p><p className="mt-1 text-xs leading-5 text-leaf-100">Ask Krishi, your AI farm assistant.</p><button onClick={() => choose('AI Assistant')} className="mt-3 text-xs font-bold text-lime-300">Start a conversation →</button></div></aside>{open && <button onClick={() => setOpen(false)} className="fixed inset-0 z-20 bg-slate-900/30 lg:hidden"/>}
+  return <div className="min-h-screen bg-[#f6f8f5] dark:bg-slate-900 lg:flex"><aside className={`fixed inset-y-0 left-0 z-30 flex w-72 flex-col bg-leaf-900 px-5 py-6 text-white transition-transform lg:static lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}><div className="flex items-center gap-3 px-3 text-xl font-bold"><span className="grid h-10 w-10 place-items-center rounded-xl bg-leaf-500"><Leaf/></span> KisanMitra</div><div className="mt-11 space-y-1">{nav.map(([Icon, label]) => <button onClick={() => choose(label)} key={label} className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium ${active === label ? 'bg-white/15 text-white' : 'text-leaf-100 hover:bg-white/10'}`}><Icon size={19}/>{label}</button>)}</div><div className="mt-auto rounded-xl bg-white/10 p-4"><p className="text-sm font-bold">Need field support?</p><p className="mt-1 text-xs leading-5 text-leaf-100">Ask KisanMitra, your AI farm assistant.</p><button onClick={() => choose('AI Assistant')} className="mt-3 text-xs font-bold text-lime-300">Start a conversation →</button></div></aside>{open && <button onClick={() => setOpen(false)} className="fixed inset-0 z-20 bg-slate-900/30 lg:hidden"/>}
     <main className="min-w-0 flex-1"><header className="relative flex h-20 items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-5 sm:px-8"><div className="flex items-center gap-4"><button onClick={() => setOpen(true)} className="lg:hidden"><Menu/></button><div><p className="text-sm text-slate-500">{currentDate}</p><h1 className="text-xl font-bold text-slate-800">Good morning, {user.name.split(' ')[0]} <span>🌱</span></h1></div></div><div className="flex items-center gap-4"><GoogleTranslate /><button onClick={() => setShowNotifications(!showNotifications)} className="relative rounded-full bg-slate-100 p-2.5"><Bell size={18}/>{notifications.length > 0 && <i className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500"/>}</button><button onClick={() => setShowProfile(true)} className="flex items-center gap-2"><span className="grid h-10 w-10 place-items-center rounded-full bg-leaf-100 font-bold text-leaf-700">{user.name[0]}</span><ChevronDown size={16}/></button></div>{showNotifications && <div className="absolute right-5 top-[72px] z-20 w-[min(92vw,370px)] rounded-2xl border border-slate-100 bg-white p-4 shadow-2xl"><div className="flex items-center justify-between"><b className="text-slate-800">Notifications</b><button onClick={() => setNotifications([])} className="text-xs font-bold text-leaf-600">Mark all read</button></div>{notifications.length ? <div className="mt-3 divide-y">{notifications.map((n, i) => <div key={i} className="py-3"><div className="flex gap-3"><span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-leaf-500"/><div><p className="text-sm font-bold text-slate-700">{n.title}</p><p className="mt-1 text-xs leading-5 text-slate-500">{n.text}</p><p className="mt-1 text-xs text-slate-400">{n.time}</p></div></div></div>)}</div> : <p className="py-8 text-center text-sm text-slate-500">You’re all caught up.</p>}</div>}</header>{showProfile && <ProfileModal user={user} onSave={(next) => { setUser(next); localStorage.setItem('agri_profile', JSON.stringify(next)); setShowProfile(false); }} onClose={() => setShowProfile(false)}/>} 
       <div className="mx-auto max-w-[1600px] p-5 sm:p-8">{active !== 'Overview' ? <FeatureView
   title={active}
@@ -811,7 +811,7 @@ function SettingsView({ darkMode, setDarkMode }) {
 function AssistantChat() {
   const [q, setQ] = useState('');
   const [language, setLanguage] = useState('English');
-  const [messages, setMessages] = useState([{ from: 'ai', text: 'Namaste! I am Krishi AI. Ask me about crops, irrigation, weather, or farming.' }]);
+  const [messages, setMessages] = useState([{ from: 'ai', text: 'Namaste! I am KisanMitra AI. Ask me about crops, irrigation, weather, or farming.' }]);
   const [listening, setListening] = useState(false);
   const languageCode = { English: 'en-IN', Hindi: 'hi-IN', Marathi: 'mr-IN', Punjabi: 'pa-IN' }[language];
 
@@ -859,14 +859,14 @@ function AssistantChat() {
   return (
     <Card>
       <p className="text-sm font-semibold text-leaf-600">
-        KRISHI AI
+        KISANMITRA AI
       </p>
 
       <h2 className="brand-serif text-3xl text-slate-800">
         Farm assistant
       </h2>
 
-      <button onClick={() => setMessages([{ from: 'ai', text: 'Namaste! I am Krishi AI. Ask me about crops, irrigation, weather, or farming.' }])} className="mt-3 rounded-lg border border-leaf-200 px-3 py-2 text-xs font-bold text-leaf-700">Reset chat</button>
+      <button onClick={() => setMessages([{ from: 'ai', text: 'Namaste! I am KisanMitra AI. Ask me about crops, irrigation, weather, or farming.' }])} className="mt-3 rounded-lg border border-leaf-200 px-3 py-2 text-xs font-bold text-leaf-700">Reset chat</button>
 
       <div className="mt-4 flex flex-wrap gap-2">
         {['English', 'Hindi', 'Marathi', 'Punjabi'].map((item) => <button key={item} onClick={() => setLanguage(item)} className={`rounded-full px-3 py-1.5 text-xs font-bold ${language === item ? 'bg-leaf-600 text-white' : 'bg-leaf-50 text-leaf-700'}`}>{item}</button>)}

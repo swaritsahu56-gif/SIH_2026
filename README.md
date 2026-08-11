@@ -1,4 +1,4 @@
-# Smart Agriculture Copilot
+# KisanMitra
 
 A full-stack SIH-ready agriculture dashboard for crop monitoring, weather insights, irrigation planning, disease checks, and farmer assistance. It runs in public demo mode with no accounts or database required.
 
