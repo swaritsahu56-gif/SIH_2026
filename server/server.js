@@ -13,7 +13,7 @@ const app = express();
 app.use(cors({ origin: true }));
 app.use(express.json());
 const upload = multer({
-  dest: "uploads/"
+  storage: multer.memoryStorage() // keep uploads in memory to avoid filesystem issues on Render
 });
 
 // Diagnostic: print short prefix of GEMINI_API_KEY so you can verify Render/local env
@@ -508,11 +508,12 @@ app.post("/api/crop-doctor", upload.single("image"), async (req, res) => {
       throw new Error("GEMINI_API_KEY is missing from .env file");
     }
 
-    const imageBase64 = fs.readFileSync(req.file.path, "base64");
+    // When using memoryStorage, the file buffer is available at req.file.buffer
+    const imageBase64 = req.file.buffer.toString("base64");
     const mimeType = req.file.mimetype;
 
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         contents: [
           {
@@ -540,7 +541,6 @@ app.post("/api/crop-doctor", upload.single("image"), async (req, res) => {
       { headers: { "Content-Type": "application/json" } }
     );
 
-    fs.unlinkSync(req.file.path);
 
     const geminiOutput = response.data.candidates[0].content.parts[0].text;
 
@@ -549,9 +549,7 @@ app.post("/api/crop-doctor", upload.single("image"), async (req, res) => {
     });
 
   } catch (err) {
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
+    // no filesystem cleanup needed when using memoryStorage
 
     console.error("Gemini API Error:", err.response?.data?.error?.message || err.message);
 
