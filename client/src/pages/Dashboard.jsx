@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Activity, Bell, Bot, CalendarDays, ChevronDown, CloudSun, Droplets, Landmark, LayoutDashboard, Leaf, LineChart, Map, Menu, Mic, ScanLine, Search, Settings, Sprout, Sun, TrendingUp, Upload, Volume2 } from 'lucide-react';
-import kisanmitraLogo from '../assets/Gemini_Generated_Image_bz2cadbz2cadbz2c.png';
+import kisanmitraLogo from '../assets/logo.png';
 
 
 const nav = [[LayoutDashboard, 'Overview'], [Map, 'My Fields'], [ScanLine, 'Crop Doctor'], [Droplets, 'Irrigation'], [CalendarDays, 'Task Calendar'], [Bot, 'AI Assistant'], [LineChart, 'Market prices'],[TrendingUp, 'Profit Calculator'], [Landmark, 'Govt Schemes'], [Settings, 'Settings']];
