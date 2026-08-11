@@ -5,7 +5,7 @@ import { Activity, Bell, Bot, CalendarDays, ChevronDown, CloudSun, Droplets, Lan
 
 const nav = [[LayoutDashboard, 'Overview'], [Map, 'My Fields'], [ScanLine, 'Crop Doctor'], [Droplets, 'Irrigation'], [CalendarDays, 'Task Calendar'], [Bot, 'AI Assistant'], [LineChart, 'Market prices'],[TrendingUp, 'Profit Calculator'], [Landmark, 'Govt Schemes'], [Settings, 'Settings']];
 const trend = [{ day:'Mon', value:38 }, { day:'Tue', value:44 }, { day:'Wed', value:41 }, { day:'Thu', value:55 }, { day:'Fri', value:48 }, { day:'Sat', value:67 }, { day:'Sun', value:64 }];
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://agricopilot-backend-16oj.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://agricopilot-backend-16oj.onrender.com';
 const Card = ({ children, className = '', style }) => 
 <section className={`rounded-2xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white p-5 shadow-card ${className}`} style={style}>
 {children}
