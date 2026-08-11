@@ -456,33 +456,28 @@ app.post("/api/chat", async (req, res) => {
   try {
     const { message, language = 'English' } = req.body;
 
-    const response = await axios.post(
-      "http://localhost:11434/api/generate",
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY is missing from environment');
+    }
+
+    // Build the prompt for Gemini
+    const prompt = `You are KisanMitra AI, an agriculture assistant.\n\nReply in ${language}. Use simple farmer-friendly wording. If a diagnosis or treatment is uncertain, say so and advise contacting a local agriculture expert before using pesticides.\n\nHelp farmers with: Crop diseases, Fertilizers, Irrigation, Weather, Pest control, Sustainable farming.\n\nFarmer question: ${message}`;
+
+    const geminiResponse = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
-        model: "llama3.1",
-        prompt: `
-      You are KisanMitra AI, an agriculture assistant.
-
-      Reply in ${language}. Use simple farmer-friendly wording. If a diagnosis or treatment is uncertain, say so and advise contacting a local agriculture expert before using pesticides.
-
-      Help farmers with:
-      - Crop diseases
-      - Fertilizers
-      - Irrigation
-      - Weather
-      - Pest control
-      - Sustainable farming
-
-      Farmer question:
-      ${message}
-      `,
-        stream: false
-      }
+        contents: [
+          {
+            parts: [{ text: prompt }]
+          }
+        ]
+      },
+      { headers: { 'Content-Type': 'application/json' } }
     );
 
-    res.json({
-      reply: response.data.response
-    });
+    const replyText = geminiResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    res.json({ reply: replyText });
 
   } catch (error) {
     console.log(error);
