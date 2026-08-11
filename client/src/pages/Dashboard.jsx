@@ -5,6 +5,7 @@ import { Activity, Bell, Bot, CalendarDays, ChevronDown, CloudSun, Droplets, Lan
 
 const nav = [[LayoutDashboard, 'Overview'], [Map, 'My Fields'], [ScanLine, 'Crop Doctor'], [Droplets, 'Irrigation'], [CalendarDays, 'Task Calendar'], [Bot, 'AI Assistant'], [LineChart, 'Market prices'],[TrendingUp, 'Profit Calculator'], [Landmark, 'Govt Schemes'], [Settings, 'Settings']];
 const trend = [{ day:'Mon', value:38 }, { day:'Tue', value:44 }, { day:'Wed', value:41 }, { day:'Thu', value:55 }, { day:'Fri', value:48 }, { day:'Sat', value:67 }, { day:'Sun', value:64 }];
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 const Card = ({ children, className = '', style }) => 
 <section className={`rounded-2xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white p-5 shadow-card ${className}`} style={style}>
 {children}
@@ -43,7 +44,7 @@ useEffect(() => {
     localStorage.setItem("theme", "light");
   }
 }, [darkMode]);
-  useEffect(() => { fetch('http://localhost:5000/api/dashboard').then((r) => r.json()).then(setApi).catch(() => {}); }, []);
+  useEffect(() => { fetch(`${API_BASE_URL}/api/dashboard`).then((r) => r.json()).then(setApi).catch(() => {}); }, []);
   const choose = (label) => { setActive(label); setOpen(false); };
 
   // Get today's date formatted as "Tuesday, 04 August 2026"
@@ -56,7 +57,7 @@ useEffect(() => {
 
   const [fieldMapImage, setFieldMapImage] = useState(null);
   useEffect(() => {
-    const load = (lat, lng) => setFieldMapImage(`http://localhost:5000/api/satellite-view?lat=${lat}&lng=${lng}`);
+    const load = (lat, lng) => setFieldMapImage(`${API_BASE_URL}/api/satellite-view?lat=${lat}&lng=${lng}`);
     
     if (location?.latitude && location?.longitude) {
       load(location.latitude, location.longitude);
@@ -192,7 +193,7 @@ function DailyVoiceBrief({ userName, cityName, location }) {
       const lat = location?.latitude || 26.7606;
       const lng = location?.longitude || 83.3732;
       
-      const response = await fetch(`http://localhost:5000/api/hyperlocal-weather?lat=${lat}&lng=${lng}`);
+      const response = await fetch(`${API_BASE_URL}/api/hyperlocal-weather?lat=${lat}&lng=${lng}`);
       const data = await response.json();
       
       if (data.temperature) liveTemp = data.temperature;
@@ -333,7 +334,7 @@ function SatelliteView() {
   };
 
   const imageUrl = coords
-    ? `http://localhost:5000/api/satellite-view?lat=${coords.lat}&lng=${coords.lng}&mode=${mode}`
+    ? `${API_BASE_URL}/api/satellite-view?lat=${coords.lat}&lng=${coords.lng}&mode=${mode}`
     : null;
 
   return (
@@ -399,7 +400,7 @@ const [result, setResult] = useState(null);
       formData.append("image", image);
 
       const response = await fetch(
-        "http://localhost:5000/api/crop-doctor",
+        `${API_BASE_URL}/api/crop-doctor`,
         {
           method: "POST",
           body: formData,
@@ -827,7 +828,7 @@ function AssistantChat() {
     setQ('');
 
     try {
-      const res = await fetch("http://localhost:5000/api/chat", {
+      const res = await fetch(`${API_BASE_URL}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
