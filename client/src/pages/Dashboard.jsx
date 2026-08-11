@@ -844,7 +844,11 @@ function AssistantChat() {
       const reply = data.reply || 'I could not generate an answer. Please try again.';
       setMessages((previous) => [...previous.filter((item) => !item.pending), { from: 'ai', text: reply }]);
     } catch (error) {
-      setMessages((previous) => [...previous.filter((item) => !item.pending), { from: 'ai', text: 'AI server is not running. Start the backend and make sure Ollama is available.' }]);
+      console.error("Chat API Error:", error);
+      setMessages((previous) => [
+        ...previous.filter((item) => !item.pending),
+        { from: 'ai', text: 'I am having trouble connecting to the cloud backend. Please check the server logs.' }
+      ]);
     }
   };
   const voiceInput = () => {
