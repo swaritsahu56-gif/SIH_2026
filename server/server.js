@@ -487,76 +487,55 @@ app.post("/api/crop-doctor", upload.single("image"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
-        result: "No image uploaded."
+        result: JSON.stringify({
+          disease: "Error",
+          treatment: "No image uploaded. Please select a file."
+        })
       });
     }
 
-    // A specialist classifier is more reliable than a general vision chat model for supported leaves.
-    // It is optional because Hugging Face requires a free access token for hosted inference.
-    if (process.env.HF_TOKEN) {
-      const imageBytes = fs.readFileSync(req.file.path);
-      const specialist = await axios.post(
-        'https://router.huggingface.co/hf-inference/models/Abuzaid01/plant-disease-classifier',
-        imageBytes,
-        { headers: { Authorization: `Bearer ${process.env.HF_TOKEN}`, 'Content-Type': req.file.mimetype }, timeout: 30000 }
-      );
-      fs.unlinkSync(req.file.path);
-      const prediction = Array.isArray(specialist.data) ? specialist.data[0] : null;
-      if (!prediction || !prediction.label || typeof prediction.score !== 'number') throw new Error('Specialist model returned no usable classification.');
-      const confidence = Math.round(prediction.score * 100);
-      const label = prediction.label.replace(/___|_/g, ' ').trim();
-      const uncertain = confidence < 70 || /background|unknown/i.test(label);
-      return res.json({ result: JSON.stringify({
-        disease: uncertain ? 'Unable to make a reliable diagnosis' : label,
-        confidence: `${confidence}%`,
-        severity: uncertain ? 'Unknown — image may not show a supported crop leaf clearly.' : 'Screening result only',
-        symptoms: uncertain ? 'Take a clear, daylight photo of one affected leaf against a plain background.' : 'Model classification from the uploaded leaf image.',
-        cause: uncertain ? 'Not enough confidence to identify a cause.' : 'Possible disease class identified by the specialist model.',
-        treatment: uncertain ? 'Do not spray based on this result. Retake the photo or consult a local agriculture expert.' : 'Confirm the diagnosis with local agricultural guidance before applying any pesticide or treatment.',
-        fertilizer: 'Do not change fertilizer solely from an image classification.',
-        prevention: 'Use clean tools, inspect nearby plants, and seek expert confirmation for serious symptoms.',
-        model: 'Plant-disease specialist classifier',
-      }) });
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is missing from .env file");
     }
 
     const imageBase64 = fs.readFileSync(req.file.path, "base64");
+    const mimeType = req.file.mimetype;
 
     const response = await axios.post(
-      "http://localhost:11434/api/generate",
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
-        model: "llava",
-       prompt: `
-You are an expert agricultural scientist.
-
-Analyze this crop image.
-
-Return ONLY JSON.
-Do not add any explanation before or after the JSON.
-
-Use exactly this format:
-
-{
-  "disease":"",
-  "confidence":"",
-  "severity":"",
-  "symptoms":"",
-  "cause":"",
-  "treatment":"",
-  "fertilizer":"",
-  "prevention":""
-}
-
-If the crop is healthy, mention "Healthy Crop" in disease.
-`,
-        images: [imageBase64],
-        stream: false,
-      }
+        contents: [
+          {
+            parts: [
+              {
+                text: `You are an expert agricultural scientist. Analyze this crop image. \
+                Return ONLY JSON. Do not add any formatting (like \`\`\`json) or explanation. \
+                Use exactly this format: \
+                {"disease":"","confidence":"","severity":"","symptoms":"","cause":"","treatment":"","fertilizer":"","prevention":""} \
+                If the crop is healthy, mention "Healthy Crop" in disease.`
+              },
+              {
+                inline_data: {
+                  mime_type: mimeType,
+                  data: imageBase64
+                }
+              }
+            ]
+          }
+        ],
+        generationConfig: {
+          response_mime_type: "application/json"
+        }
+      },
+      { headers: { "Content-Type": "application/json" } }
     );
 
     fs.unlinkSync(req.file.path);
 
-    res.json({
-      result: response.data.response,
+    const geminiOutput = response.data.candidates[0].content.parts[0].text;
+
+    res.status(200).json({
+      result: geminiOutput
     });
 
   } catch (err) {
@@ -564,10 +543,21 @@ If the crop is healthy, mention "Healthy Crop" in disease.
       fs.unlinkSync(req.file.path);
     }
 
-    console.error(err);
+    console.error("Gemini API Error:", err.response?.data?.error?.message || err.message);
 
-    res.status(500).json({
-      result: "Unable to analyze crop image."
+    const fallbackJSON = {
+      disease: "Analysis Failed",
+      confidence: "0%",
+      severity: "Error",
+      symptoms: "N/A",
+      cause: "AI Processing Error",
+      treatment: "Gemini was unable to analyze this image. Make sure your GEMINI_API_KEY is valid.",
+      fertilizer: "N/A",
+      prevention: "Check the terminal console for detailed error logs."
+    };
+
+    res.status(200).json({
+      result: JSON.stringify(fallbackJSON)
     });
   }
 });
