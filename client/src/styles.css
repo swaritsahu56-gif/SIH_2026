@@ -67,3 +67,11 @@ input {
     #ed962d 49% 100%
   );
 }
+
+/* Logo sizing — change --logo-height to adjust */
+.navbar-logo {
+  height: var(--logo-height, 64px);
+  width: auto;
+  display: block;
+  background: transparent;
+}
